@@ -21,6 +21,19 @@ namespace Perlin
         public Point Cursor;
         private GTexture cursorTexture;
 
+
+        private Unit SelectedUnit
+        {
+            get => selectedUnit;
+            set
+            {
+                if (value == null)
+                    Logger.Log("Unselecting unit");
+                else
+                    Logger.Log("Selecting unit: " + value.Name);
+                selectedUnit = value;
+            }
+        }
         private Unit selectedUnit;
 
 
@@ -60,7 +73,7 @@ namespace Perlin
 
         public void PlaceUnit(int x, int y, Unit unit)
         {
-            if (units[x, y] != null)
+            if (units[x, y] != null && units[x, y] != unit)
             {
                 Logger.Log("A unit already occupies this space.");
                 return;
@@ -156,18 +169,18 @@ namespace Perlin
 
             if (Input.Pressed(Keys.C))
             {
-                if (selectedUnit == null)
+                if (SelectedUnit == null && units[Cursor.X, Cursor.Y] != null)
                 {
-                    selectedUnit = units[Cursor.X, Cursor.Y];
-                    highlightedTiles = selectedUnit?.FindTiles();
+                    SelectedUnit = units[Cursor.X, Cursor.Y];
+                    highlightedTiles = SelectedUnit?.FindTiles();
                 }
                     
                 else
                 {
-                    if (highlightedTiles.Contains(Cursor))
+                    if (highlightedTiles != null && highlightedTiles.Contains(Cursor))
                     {
-                        PlaceUnit(Cursor, selectedUnit);
-                        selectedUnit = null;
+                        PlaceUnit(Cursor, SelectedUnit);
+                        SelectedUnit = null;
                         highlightedTiles = null;
                     }
                     

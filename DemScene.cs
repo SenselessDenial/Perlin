@@ -50,8 +50,10 @@ namespace Perlin
             map = new Map(this, 10, 10);
             map.SetAllTiles(Tile.Grass);
             map.SetTile(2, 2, Tile.Forest);
-            Unit s = new Unit("Dude", Unit.tilemap[1], Weapon.Sword);
-            Unit bro = new Unit("Bro", Unit.tilemap[3], Weapon.Sword);
+            map.SetTile(3, 2, Tile.Mountain);
+            map.SetTile(4, 2, Tile.Water);
+            Unit s = new Unit("Dude", Unit.tilemap[1], Weapon.Sword, Faction.BluTeam);
+            Unit bro = new Unit("Bro", Unit.tilemap[4], Weapon.Sword, Faction.RedTeam);
             map.PlaceUnit(0, 0, s);
             map.PlaceUnit(0, 1, bro);
         }

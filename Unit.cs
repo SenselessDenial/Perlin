@@ -19,16 +19,18 @@ namespace Perlin
         public WeaponStruct Weapon;
         public int Movement;
 
+        public Faction Faction;
 
         
 
-        public Unit(string name, GTexture texture, Weapon weapon)
+        public Unit(string name, GTexture texture, Weapon weapon, Faction faction)
         {
             Name = name;
             Texture = texture;
             Weapon = new WeaponStruct(weapon);
             Position = new Point(-1, -1);
             Movement = 3;
+            Faction = faction;
         }
 
         public List<Point> FindTiles()
@@ -61,35 +63,40 @@ namespace Perlin
 
                 Point current = point + new Point(1, 0);
                 int movement;
+                Unit unit;
 
                 if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
                 {
+                    unit = Map.units[current.X, current.Y];
                     movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost;
-                    if (movement >= 0)
+                    if (movement >= 0 && (unit == null || unit.Faction == Faction))
                         queue.Enqueue(new MovePoint(current, movement));
                 }
 
                 current = point + new Point(-1, 0);
                 if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
                 {
+                    unit = Map.units[current.X, current.Y];
                     movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost;
-                    if (movement >= 0)
+                    if (movement >= 0 && (unit == null || unit.Faction == Faction))
                         queue.Enqueue(new MovePoint(current, movement));
                 }
 
                 current = point + new Point(0, 1);
                 if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
                 {
+                    unit = Map.units[current.X, current.Y];
                     movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost;
-                    if (movement >= 0)
+                    if (movement >= 0 && (unit == null || unit.Faction == Faction))
                         queue.Enqueue(new MovePoint(current, movement));
                 }
 
                 current = point + new Point(0, -1);
                 if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
                 {
+                    unit = Map.units[current.X, current.Y];
                     movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost;
-                    if (movement >= 0)
+                    if (movement >= 0 && (unit == null || unit.Faction == Faction))
                         queue.Enqueue(new MovePoint(current, movement));
                 }
 
