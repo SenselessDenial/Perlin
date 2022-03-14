@@ -51,8 +51,9 @@ namespace Perlin
             map.SetAllTiles(Tile.Grass);
             map.SetTile(2, 2, Tile.Forest);
             Unit s = new Unit("Dude", Unit.tilemap[1], Weapon.Sword);
+            Unit bro = new Unit("Bro", Unit.tilemap[3], Weapon.Sword);
             map.PlaceUnit(0, 0, s);
-
+            map.PlaceUnit(0, 1, bro);
         }
 
         public override void Update()

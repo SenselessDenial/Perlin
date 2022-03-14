@@ -11,8 +11,8 @@ namespace Perlin
 {
     class Map : Entity
     {
-        private int width;
-        private int height;
+        public int Width;
+        public int Height;
         private int tileWidth = 16;
 
         public Unit[,] units;
@@ -21,24 +21,31 @@ namespace Perlin
         public Point Cursor;
         private GTexture cursorTexture;
 
+        private Unit selectedUnit;
+
+
+        private List<Point> highlightedTiles;
+
+
 
         public Map(Scene scene, int width, int height) : base(scene)
         {
-            this.width = width;
-            this.height = height;
+            this.Width = width;
+            this.Height = height;
 
             units = new Unit[width, height];
             tiles = new Tile[width, height];
             Cursor = Point.Zero;
 
             cursorTexture = new GTexture("cursor.png");
+            highlightedTiles = null;
         }
 
         public void SetAllTiles(Tile tile)
         {
-            for (int j = 0; j < height; j++)
+            for (int j = 0; j < Height; j++)
             {
-                for (int i = 0; i < width; i++)
+                for (int i = 0; i < Width; i++)
                 {
                     tiles[i, j] = tile;
                 }
@@ -47,27 +54,43 @@ namespace Perlin
 
         public void SetTile(int x, int y, Tile tile)
         {
-            if (x >= 0 && y >= 0 && x < width && y < height)
+            if (x >= 0 && y >= 0 && x < Width && y < Height)
                 tiles[x, y] = tile;
         }
 
         public void PlaceUnit(int x, int y, Unit unit)
         {
-            if (ContainsUnit(unit))
+            if (units[x, y] != null)
             {
-                Logger.Log("Unit " + unit.Name + " is already on the map.");
+                Logger.Log("A unit already occupies this space.");
                 return;
             }
 
-            if (x >= 0 && y >= 0 && x < width && y < height)
+            if (ContainsUnit(unit))
+            {
+                Point p = unit.Position;
+                units[p.X, p.Y] = null;
+            }
+
+            if (x >= 0 && y >= 0 && x < Width && y < Height)
+            {
                 units[x, y] = unit;
+                unit.Position = new Point(x, y);
+                unit.Map = this;
+            }
+                
+        }
+
+        public void PlaceUnit(Point p, Unit unit)
+        {
+            PlaceUnit(p.X, p.Y, unit);
         }
 
         private bool ContainsUnit(Unit unit)
         {
-            for (int j = 0; j < height; j++)
+            for (int j = 0; j < Height; j++)
             {
-                for (int i = 0; i < width; i++)
+                for (int i = 0; i < Width; i++)
                 {
                     if (units[i, j] == unit)
                         return true;
@@ -91,7 +114,7 @@ namespace Perlin
             }
             else if (Input.Pressed(Keys.Right))
             {
-                if (Cursor.X + 1 >= width)
+                if (Cursor.X + 1 >= Width)
                 {
 
                 }
@@ -114,7 +137,7 @@ namespace Perlin
             }
             else if (Input.Pressed(Keys.Down))
             {
-                if (Cursor.Y + 1 >= height)
+                if (Cursor.Y + 1 >= Height)
                 {
 
                 }
@@ -130,27 +153,60 @@ namespace Perlin
             base.Update();
 
             UpdateCursor();
+
+            if (Input.Pressed(Keys.C))
+            {
+                if (selectedUnit == null)
+                {
+                    selectedUnit = units[Cursor.X, Cursor.Y];
+                    highlightedTiles = selectedUnit?.FindTiles();
+                }
+                    
+                else
+                {
+                    if (highlightedTiles.Contains(Cursor))
+                    {
+                        PlaceUnit(Cursor, selectedUnit);
+                        selectedUnit = null;
+                        highlightedTiles = null;
+                    }
+                    
+                }
+                   
+            }
+
         }
 
         public override void Render()
         {
             base.Render();
 
-            for (int j = 0; j < height; j++)
+            for (int j = 0; j < Height; j++)
             {
-                for (int i = 0; i < width; i++)
+                for (int i = 0; i < Width; i++)
                 {
                     tiles[i, j]?.Texture.Draw(new Vector2(i*tileWidth, j*tileWidth));
                 }
             }
 
-            for (int j = 0; j < height; j++)
+            for (int j = 0; j < Height; j++)
             {
-                for (int i = 0; i < width; i++)
+                for (int i = 0; i < Width; i++)
                 {
                     units[i, j]?.Texture.Draw(new Vector2(i * tileWidth, j * tileWidth));
                 }
             }
+
+            if (highlightedTiles != null)
+            {
+                foreach (var item in highlightedTiles)
+                {
+                    Drawing.DrawBox(new Rectangle(item.X * tileWidth, item.Y * tileWidth, tileWidth, tileWidth), new Color(0, 0, 255, 125));
+                }
+            }
+
+            
+
 
             cursorTexture.Draw(Cursor.ToVector2() * 16);
 
