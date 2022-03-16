@@ -61,7 +61,9 @@ namespace Perlin
         }
 
         public static Weapon IronSword = new Weapon("Iron Sword", WeaponTextures[1], WeaponTypes.Sword, 6, 1, 1, 80, false);
+        public static Weapon IronSpear = new Weapon("Iron Spear", WeaponTextures[3], WeaponTypes.Lance, 5, 1, 1, 85, false);
         public static Weapon WoodenBow = new Weapon("Wooden Bow", WeaponTextures[7], WeaponTypes.Bow, 6, 2, 2, 70, false);
+        public static Weapon IronAxe = new Weapon("Iron Axe", WeaponTextures[5], WeaponTypes.Axe, 8, 1, 1, 60, false);
 
     }
 }

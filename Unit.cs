@@ -35,6 +35,8 @@ namespace Perlin
 
         public Faction Faction;
         public bool IsFatigued;
+
+        public bool IsDead => Stats.HP <= 0;
        
         public Unit(string name, GTexture texture, Weapon weapon, Faction faction)
         {
@@ -57,6 +59,23 @@ namespace Perlin
                 dodge += CurrentTile.DodgeBonus;
 
             return dodge;
+        }
+
+        public int DistanceFromUnit(Unit unit)
+        {
+            Point diff = Position - unit.Position;
+            return Math.Abs(diff.X) + Math.Abs(diff.Y);
+        }
+
+        public bool InRangeOf(Unit unit)
+        {
+            int distance = DistanceFromUnit(unit);
+            return distance >= Weapon.MinRange && distance <= Weapon.MaxRange;
+        }
+
+        public bool CanCounter(Unit attacker, Weapon attackWeapon)
+        {
+            return InRangeOf(attacker);
         }
 
         public List<Point> FindMovementTiles()
@@ -209,7 +228,7 @@ namespace Perlin
 
         public void DrawCard(Vector2 pos)
         {
-            Drawing.Font.Draw(Name, pos);
+            Drawing.Font.Draw(Name, pos, Faction.Color);
             //Drawing.Font.Draw(Class.Name, pos + new Vector2(40, 0));
             Weapon.Texture.Draw(pos + new Vector2(0, 10));
             Drawing.Font.Draw(Weapon.Name, pos + new Vector2(20, 12));

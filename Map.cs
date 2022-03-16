@@ -50,9 +50,13 @@ namespace Perlin
 
         private List<Point> highlightedTiles;
         private List<Point> attackTiles;
-        private Point storedPosition = new Point(-1, -1);   
+        private Point storedPosition = new Point(-1, -1);
 
+        private List<Faction> Factions;
+        private List<Unit> ListOfUnits;
 
+        private Faction currentFaction => Factions[currentFactionNum];
+        private int currentFactionNum = 0;
 
         public Map(Scene scene, int width, int height) : base(scene)
         {
@@ -66,14 +70,58 @@ namespace Perlin
             cursorTexture = new GTexture("cursor.png");
             highlightedTiles = null;
             attackTiles = null;
+            Factions = new List<Faction>();
+            ListOfUnits = new List<Unit>();
         }
+
+        public void Start()
+        {
+            StartOfTurn();
+        }
+
+        public void StartOfTurn()
+        {
+            Logger.Log("Current faction: " + currentFaction.Name);
+        }
+
+        public void EndofTurn()
+        {
+            for (int j = 0; j < Height; j++)
+            {
+                for (int i = 0; i < Width; i++)
+                {
+                    if (units[i,j] != null && units[i, j].Faction == currentFaction)
+                        units[i, j].IsFatigued = false;
+                }
+            }
+
+            if (currentFactionNum == Factions.Count - 1)
+                currentFactionNum = 0;
+            else
+                currentFactionNum++;
+
+            StartOfTurn();
+        }
+
+        private bool AllUnitsFatigued(Faction faction)
+        {
+            foreach (var item in ListOfUnits)
+            {
+                if (item.Faction == faction && !item.IsFatigued)
+                    return false;
+            }
+            return true;
+        }
+
 
         public void UpdateCursorState(bool aButtonPress, bool bButtonPress)
         {
+            Unit unit = units[Cursor.X, Cursor.Y];
+
             switch (cursorState)
             {
                 case CursorStates.Unselected:
-                    if (aButtonPress && units[Cursor.X, Cursor.Y] != null)
+                    if (aButtonPress && unit != null && !unit.IsFatigued)
                     {
                         selectedUnit = units[Cursor.X, Cursor.Y];
                         storedPosition = selectedUnit.Position;
@@ -90,7 +138,7 @@ namespace Perlin
                         storedPosition = new Point(-1, -1);
                         cursorState = CursorStates.Unselected;
                     }
-                    else if (aButtonPress && highlightedTiles != null && highlightedTiles.Contains(Cursor))
+                    else if (aButtonPress && highlightedTiles != null && highlightedTiles.Contains(Cursor) && selectedUnit.Faction == currentFaction)
                     {
                         PlaceUnit(Cursor, selectedUnit);
                         highlightedTiles = null;
@@ -107,22 +155,28 @@ namespace Perlin
                         cursorState = CursorStates.Selected;
 
                     }
-                    if (aButtonPress && attackTiles.Contains(Cursor) && units[Cursor.X, Cursor.Y] != null)
+                    if (aButtonPress && attackTiles.Contains(Cursor) && unit != null && unit.Faction != selectedUnit.Faction)
                     {
-                        CombatHandler.Attack(selectedUnit, selectedUnit.Weapon, units[Cursor.X, Cursor.Y], units[Cursor.X, Cursor.Y].Weapon);
+                        CombatHandler.AttackPlus(selectedUnit, selectedUnit.Weapon, units[Cursor.X, Cursor.Y], units[Cursor.X, Cursor.Y].Weapon);
+                        selectedUnit.IsFatigued = true;
                         selectedUnit = null;
                         highlightedTiles = null;
                         attackTiles = null;
                         storedPosition = new Point(-1, -1);
                         cursorState = CursorStates.Unselected;
+                        if (AllUnitsFatigued(currentFaction))
+                            EndofTurn();
                     }
                     else if (aButtonPress && Cursor == selectedUnit.Position)
                     {
+                        selectedUnit.IsFatigued = true;
                         selectedUnit = null;
                         highlightedTiles = null;
                         attackTiles = null;
                         storedPosition = new Point(-1, -1);
                         cursorState = CursorStates.Unselected;
+                        if (AllUnitsFatigued(currentFaction))
+                            EndofTurn();
                     }
                     break;
                 default:
@@ -171,6 +225,16 @@ namespace Perlin
                 units[x, y] = unit;
                 unit.Position = new Point(x, y);
                 unit.Map = this;
+            }
+
+            if (!ListOfUnits.Contains(unit))
+            {
+                ListOfUnits.Add(unit);
+            }
+
+            if (!Factions.Contains(unit.Faction))
+            {
+                Factions.Add(unit.Faction);
             }
 
             HoverUnit = units[Cursor.X, Cursor.Y];
@@ -308,7 +372,8 @@ namespace Perlin
             }
 
 
-            cursorTexture.Draw(Cursor.ToVector2() * tileWidth);
+
+            cursorTexture.Draw(Cursor.ToVector2() * tileWidth, currentFaction.Color);
 
             if (HoverUnit != null)
             {
@@ -319,6 +384,10 @@ namespace Perlin
             {
                 HoverTile.DrawCard(new Vector2(120, 170));
             }
+
+            if (currentFaction != null)
+                Drawing.Font.Draw(currentFaction.Name, new Vector2(165, 10), currentFaction.Color);
+
                 
         }
 

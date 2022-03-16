@@ -11,7 +11,7 @@ namespace Perlin
     class UnitClass
     {
         public string Name { get; private set; }
-
+        public int Movement { get; private set; }
 
 
         public UnitClass(string name)

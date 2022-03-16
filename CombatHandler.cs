@@ -32,7 +32,12 @@ namespace Perlin
             }
         }
 
-
+        public static void AttackPlus(Unit attacker, Weapon attackWeapon, Unit defender, Weapon defendweapon)
+        {
+            Attack(attacker, attackWeapon, defender, defendweapon);
+            if (defender.CanCounter(attacker, attackWeapon))
+                Attack(defender, defendweapon, attacker, attackWeapon);
+        }
 
 
 

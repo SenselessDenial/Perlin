@@ -24,10 +24,9 @@ namespace Perlin
             DodgeBonus = dodgeBonus;
         }
 
-        public static Tile Grass = new Tile("Grass", tilemap[1], 1, 0);
-        public static Tile Forest = new Tile("Forest", tilemap[2], 2, 10);
-        public static Tile Mountain = new Tile("Mountain", tilemap[3], 3, 20);
-        public static Tile Water = new Tile("Water", tilemap[4], 99, 0);
+        public virtual void OnStartOfTurn(Unit unit) { }
+
+        
 
         public void Draw(Vector2 pos)
         {
@@ -42,6 +41,9 @@ namespace Perlin
             Drawing.Font.Draw("Dodge: " + DodgeBonus, pos + new Vector2(20, 20));
         }
 
-
+        public static Tile Grass = new Tile("Grass", tilemap[1], 1, 0);
+        public static Tile Forest = new Tile("Forest", tilemap[2], 2, 10);
+        public static Tile Mountain = new Tile("Mountain", tilemap[3], 3, 20);
+        public static Tile Water = new Tile("Water", tilemap[4], 99, 0);
     }
 }

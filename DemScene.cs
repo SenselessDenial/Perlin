@@ -29,17 +29,21 @@ namespace Perlin
 
             FillColor = Color.Black;
 
-            Logger.Log(NameGenerator.GenerateComboName());
-
             map = new Map(this, 10, 10);
             map.SetAllTiles(Tile.Grass);
             map.SetTile(2, 2, Tile.Forest);
             map.SetTile(3, 2, Tile.Mountain);
             map.SetTile(4, 2, Tile.Water);
-            Unit s = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[1], Weapon.IronSword, Faction.BluTeam);
-            Unit bro = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[4], Weapon.WoodenBow, Faction.RedTeam);
+            Unit s = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[1, 0], Weapon.IronSword, Faction.OrangeDoves);
+            Unit bro = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[2, 3], Weapon.WoodenBow, Faction.GreenWolves);
+            Unit karl = new Unit("Karl", Unit.tilemap[1, 2], Weapon.IronAxe, Faction.OrangeDoves);
+            Unit tharzin = new Unit("Tharzin", Unit.tilemap[3, 1], Weapon.IronSpear, Faction.PurpleDragons);
             map.PlaceUnit(0, 0, s);
             map.PlaceUnit(0, 1, bro);
+            map.PlaceUnit(5, 6, karl);
+            map.PlaceUnit(2, 3, tharzin);
+
+            map.Start();
         }
 
         public override void Update()
