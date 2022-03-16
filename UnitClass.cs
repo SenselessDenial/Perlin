@@ -14,13 +14,16 @@ namespace Perlin
 
 
 
+        public UnitClass(string name)
+        {
+            Name = name;
+        }
 
 
 
 
+        public static UnitClass Villager = new UnitClass("Villager");
 
-
-
-
+       
     }
 }

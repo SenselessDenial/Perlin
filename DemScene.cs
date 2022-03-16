@@ -14,15 +14,6 @@ namespace Perlin
         public Camera c;
         FullRenderer f;
 
-        NoisyBoy nb;
-
-        PerlinBoy pb;
-        CellAutoBoy cb;
-
-        Foogoo fab;
-
-        Cube cube;
-
         Map map;
 
         public DemScene() : base()
@@ -37,23 +28,16 @@ namespace Perlin
             Renderers.Add(f);
 
             FillColor = Color.Black;
-            //nb = new NoisyBoy(this);
-            //pb = new PerlinBoy(this);
-            //cb = new CellAutoBoy(this, 200);
-            //cb.IslandGen(5);
 
-            //fab = new Foogoo(10, 10, this);
-            //fab.Set(0, 0, 5, 5, 0, 2);
-
-            //cube = new Cube(this);
+            Logger.Log(NameGenerator.GenerateComboName());
 
             map = new Map(this, 10, 10);
             map.SetAllTiles(Tile.Grass);
             map.SetTile(2, 2, Tile.Forest);
             map.SetTile(3, 2, Tile.Mountain);
             map.SetTile(4, 2, Tile.Water);
-            Unit s = new Unit("Dude", Unit.tilemap[1], Weapon.Sword, Faction.BluTeam);
-            Unit bro = new Unit("Bro", Unit.tilemap[4], Weapon.Sword, Faction.RedTeam);
+            Unit s = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[1], Weapon.IronSword, Faction.BluTeam);
+            Unit bro = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[4], Weapon.WoodenBow, Faction.RedTeam);
             map.PlaceUnit(0, 0, s);
             map.PlaceUnit(0, 1, bro);
         }

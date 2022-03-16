@@ -44,17 +44,18 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="CellAutoBoy.cs" />
-    <Compile Include="Cube.cs" />
+    <Compile Include="Boys\CellAutoBoy.cs" />
+    <Compile Include="CombatHandler.cs" />
+    <Compile Include="Boys\Cube.cs" />
     <Compile Include="DemScene.cs" />
     <Compile Include="Faction.cs" />
-    <Compile Include="Foogoo.cs" />
     <Compile Include="Game1.cs" />
-    <Compile Include="GameOLBoyAdvance.cs" />
+    <Compile Include="Boys\GameOLBoyAdvance.cs" />
     <Compile Include="LandMap.cs" />
     <Compile Include="Map.cs" />
-    <Compile Include="NoisyBoy.cs" />
-    <Compile Include="PerlinBoy.cs" />
+    <Compile Include="NameGenerator.cs" />
+    <Compile Include="Boys\NoisyBoy.cs" />
+    <Compile Include="Boys\PerlinBoy.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Statsheet.cs" />

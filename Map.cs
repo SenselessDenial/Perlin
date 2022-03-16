@@ -13,13 +13,22 @@ namespace Perlin
     {
         public int Width;
         public int Height;
-        private int tileWidth = 16;
+        private int TileWidth = 16;
 
         public Unit[,] units;
         public Tile[,] tiles;
 
         public Point Cursor;
         private GTexture cursorTexture;
+
+        private enum CursorStates
+        {
+            Unselected,
+            Selected,
+            AfterMove
+        }
+
+        private CursorStates cursorState = CursorStates.Unselected;
 
 
         private Unit SelectedUnit
@@ -36,8 +45,12 @@ namespace Perlin
         }
         private Unit selectedUnit;
 
+        private Unit HoverUnit;
+        private Tile HoverTile;
 
         private List<Point> highlightedTiles;
+        private List<Point> attackTiles;
+        private Point storedPosition = new Point(-1, -1);   
 
 
 
@@ -52,7 +65,71 @@ namespace Perlin
 
             cursorTexture = new GTexture("cursor.png");
             highlightedTiles = null;
+            attackTiles = null;
         }
+
+        public void UpdateCursorState(bool aButtonPress, bool bButtonPress)
+        {
+            switch (cursorState)
+            {
+                case CursorStates.Unselected:
+                    if (aButtonPress && units[Cursor.X, Cursor.Y] != null)
+                    {
+                        selectedUnit = units[Cursor.X, Cursor.Y];
+                        storedPosition = selectedUnit.Position;
+                        highlightedTiles = SelectedUnit?.FindMovementTiles();
+                        cursorState = CursorStates.Selected;
+                    }
+                    break;
+                case CursorStates.Selected:
+                    if (bButtonPress)
+                    {
+                        selectedUnit = null;
+                        highlightedTiles = null;
+                        attackTiles = null;
+                        storedPosition = new Point(-1, -1);
+                        cursorState = CursorStates.Unselected;
+                    }
+                    else if (aButtonPress && highlightedTiles != null && highlightedTiles.Contains(Cursor))
+                    {
+                        PlaceUnit(Cursor, selectedUnit);
+                        highlightedTiles = null;
+                        attackTiles = selectedUnit?.FindAttackTiles();
+                        cursorState = CursorStates.AfterMove;
+                    }
+                    break;
+                case CursorStates.AfterMove:
+                    if (bButtonPress)
+                    {
+                        PlaceUnit(storedPosition, selectedUnit);
+                        attackTiles = null;
+                        highlightedTiles = SelectedUnit?.FindMovementTiles();
+                        cursorState = CursorStates.Selected;
+
+                    }
+                    if (aButtonPress && attackTiles.Contains(Cursor) && units[Cursor.X, Cursor.Y] != null)
+                    {
+                        CombatHandler.Attack(selectedUnit, selectedUnit.Weapon, units[Cursor.X, Cursor.Y], units[Cursor.X, Cursor.Y].Weapon);
+                        selectedUnit = null;
+                        highlightedTiles = null;
+                        attackTiles = null;
+                        storedPosition = new Point(-1, -1);
+                        cursorState = CursorStates.Unselected;
+                    }
+                    else if (aButtonPress && Cursor == selectedUnit.Position)
+                    {
+                        selectedUnit = null;
+                        highlightedTiles = null;
+                        attackTiles = null;
+                        storedPosition = new Point(-1, -1);
+                        cursorState = CursorStates.Unselected;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
 
         public void SetAllTiles(Tile tile)
         {
@@ -63,12 +140,16 @@ namespace Perlin
                     tiles[i, j] = tile;
                 }
             }
+
+            HoverTile = tiles[Cursor.X, Cursor.Y];
         }
 
         public void SetTile(int x, int y, Tile tile)
         {
             if (x >= 0 && y >= 0 && x < Width && y < Height)
                 tiles[x, y] = tile;
+
+            HoverTile = tiles[Cursor.X, Cursor.Y];
         }
 
         public void PlaceUnit(int x, int y, Unit unit)
@@ -91,12 +172,18 @@ namespace Perlin
                 unit.Position = new Point(x, y);
                 unit.Map = this;
             }
-                
+
+            HoverUnit = units[Cursor.X, Cursor.Y];
         }
 
         public void PlaceUnit(Point p, Unit unit)
         {
             PlaceUnit(p.X, p.Y, unit);
+        }
+
+        public bool Contains(Point point)
+        {
+            return point.X >= 0 && point.Y >= 0 && point.X < Width && point.Y < Height;
         }
 
         private bool ContainsUnit(Unit unit)
@@ -114,6 +201,7 @@ namespace Perlin
 
         private void UpdateCursor()
         {
+            bool changed = false;
             if (Input.Pressed(Keys.Left))
             {
                 if (Cursor.X - 1 < 0)
@@ -123,6 +211,7 @@ namespace Perlin
                 else
                 {
                     Cursor.X -= 1;
+                    changed = true;
                 }
             }
             else if (Input.Pressed(Keys.Right))
@@ -134,6 +223,7 @@ namespace Perlin
                 else
                 {
                     Cursor.X += 1;
+                    changed = true;
                 }
             }
 
@@ -146,6 +236,7 @@ namespace Perlin
                 else
                 {
                     Cursor.Y -= 1;
+                    changed = true;
                 }
             }
             else if (Input.Pressed(Keys.Down))
@@ -157,8 +248,16 @@ namespace Perlin
                 else
                 {
                     Cursor.Y += 1;
+                    changed = true;
                 }
             }
+
+            if (changed)
+            {
+                HoverUnit = units[Cursor.X, Cursor.Y];
+                HoverTile = tiles[Cursor.X, Cursor.Y];
+            }
+                
         }
 
         public override void Update()
@@ -167,38 +266,20 @@ namespace Perlin
 
             UpdateCursor();
 
-            if (Input.Pressed(Keys.C))
-            {
-                if (SelectedUnit == null && units[Cursor.X, Cursor.Y] != null)
-                {
-                    SelectedUnit = units[Cursor.X, Cursor.Y];
-                    highlightedTiles = SelectedUnit?.FindTiles();
-                }
-                    
-                else
-                {
-                    if (highlightedTiles != null && highlightedTiles.Contains(Cursor))
-                    {
-                        PlaceUnit(Cursor, SelectedUnit);
-                        SelectedUnit = null;
-                        highlightedTiles = null;
-                    }
-                    
-                }
-                   
-            }
-
+            UpdateCursorState(Input.Pressed(Keys.C), Input.Pressed(Keys.X));
         }
 
         public override void Render()
         {
             base.Render();
 
+            int tileWidth = TileWidth;
+
             for (int j = 0; j < Height; j++)
             {
                 for (int i = 0; i < Width; i++)
                 {
-                    tiles[i, j]?.Texture.Draw(new Vector2(i*tileWidth, j*tileWidth));
+                    tiles[i, j]?.Draw(new Vector2(i * tileWidth, j * tileWidth));
                 }
             }
 
@@ -206,7 +287,7 @@ namespace Perlin
             {
                 for (int i = 0; i < Width; i++)
                 {
-                    units[i, j]?.Texture.Draw(new Vector2(i * tileWidth, j * tileWidth));
+                    units[i, j]?.Draw(new Vector2(i * tileWidth, j * tileWidth));
                 }
             }
 
@@ -214,16 +295,31 @@ namespace Perlin
             {
                 foreach (var item in highlightedTiles)
                 {
-                    Drawing.DrawBox(new Rectangle(item.X * tileWidth, item.Y * tileWidth, tileWidth, tileWidth), new Color(0, 0, 255, 125));
+                    Drawing.DrawBox(new Rectangle(item.X * tileWidth, item.Y * tileWidth, tileWidth-1, tileWidth-1), new Color(0, 0, 255, 125));
                 }
             }
 
-            
+            if (attackTiles != null)
+            {
+                foreach (var item in attackTiles)
+                {
+                    Drawing.DrawBox(new Rectangle(item.X * tileWidth, item.Y * tileWidth, tileWidth-1, tileWidth-1), new Color(255, 0, 0, 125));
+                }
+            }
 
 
-            cursorTexture.Draw(Cursor.ToVector2() * 16);
+            cursorTexture.Draw(Cursor.ToVector2() * tileWidth);
 
+            if (HoverUnit != null)
+            {
+                HoverUnit.DrawCard(new Vector2(10, 170));
+            }
 
+            if (HoverTile != null)
+            {
+                HoverTile.DrawCard(new Vector2(120, 170));
+            }
+                
         }
 
 
