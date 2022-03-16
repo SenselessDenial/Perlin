@@ -23,6 +23,7 @@ namespace Perlin
         public static Faction OrangeDoves = new Faction("Orange Doves", Color.Orange);
         public static Faction GreenWolves = new Faction("Green Wolves", Color.Green);
         public static Faction PurpleDragons = new Faction("Purple Dragons", Color.Purple);
+        public static Faction BlueFrogs = new Faction("Blue Frogs", Color.SkyBlue);
 
     }
 }

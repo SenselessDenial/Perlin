@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using GangplankEngine;
 
 namespace Perlin
@@ -34,14 +35,16 @@ namespace Perlin
             map.SetTile(2, 2, Tile.Forest);
             map.SetTile(3, 2, Tile.Mountain);
             map.SetTile(4, 2, Tile.Water);
-            Unit s = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[1, 0], Weapon.IronSword, Faction.OrangeDoves);
-            Unit bro = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[2, 3], Weapon.WoodenBow, Faction.GreenWolves);
-            Unit karl = new Unit("Karl", Unit.tilemap[1, 2], Weapon.IronAxe, Faction.OrangeDoves);
-            Unit tharzin = new Unit("Tharzin", Unit.tilemap[3, 1], Weapon.IronSpear, Faction.PurpleDragons);
+            Unit s = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[1, 0], UnitClass.Swordsman, Weapon.IronSword, Faction.OrangeDoves);
+            Unit bro = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[2, 3], UnitClass.Archer, Weapon.WoodenBow, Faction.GreenWolves);
+            Unit karl = new Unit("Karl", Unit.tilemap[1, 2], UnitClass.Axeman, Weapon.IronAxe, Faction.OrangeDoves);
+            Unit tharzin = new Unit("Tharzin", Unit.tilemap[3, 1], UnitClass.Pikeman, Weapon.IronSpear, Faction.PurpleDragons);
+            Unit henneson = new Unit("Henneson", new GTexture("cavalry.png"), UnitClass.Cavalry, Weapon.IronSpear, Faction.BlueFrogs);
             map.PlaceUnit(0, 0, s);
             map.PlaceUnit(0, 1, bro);
             map.PlaceUnit(5, 6, karl);
             map.PlaceUnit(2, 3, tharzin);
+            map.PlaceUnit(4, 7, henneson);
 
             map.Start();
         }
@@ -49,6 +52,9 @@ namespace Perlin
         public override void Update()
         {
             base.Update();
+
+            if (Input.Pressed(Keys.R))
+                map.EndTurn();
 
       
         }

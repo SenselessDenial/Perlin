@@ -31,21 +31,20 @@ namespace Perlin
         public UnitClass Class;
         public Statsheet Stats;
         public Weapon Weapon;
-        public int Movement;
+        public int Movement => Class.Movement;
 
         public Faction Faction;
         public bool IsFatigued;
 
         public bool IsDead => Stats.HP <= 0;
        
-        public Unit(string name, GTexture texture, Weapon weapon, Faction faction)
+        public Unit(string name, GTexture texture, UnitClass unitClass, Weapon weapon, Faction faction)
         {
             Name = name;
             Texture = texture;
+            Class = unitClass;
             Weapon = weapon;
             Position = new Point(-1, -1);
-            Movement = 3;
-            Class = UnitClass.Villager;
             Stats = Statsheet.Demo;
             Faction = faction;
             IsFatigued = false;
@@ -109,7 +108,7 @@ namespace Perlin
                 if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
                 {
                     unit = Map.units[current.X, current.Y];
-                    movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost;
+                    movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost(this);
                     if (movement >= 0 && (unit == null || unit.Faction == Faction))
                         queue.Enqueue(new MovePoint(current, movement));
                 }
@@ -118,7 +117,7 @@ namespace Perlin
                 if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
                 {
                     unit = Map.units[current.X, current.Y];
-                    movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost;
+                    movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost(this);
                     if (movement >= 0 && (unit == null || unit.Faction == Faction))
                         queue.Enqueue(new MovePoint(current, movement));
                 }
@@ -127,7 +126,7 @@ namespace Perlin
                 if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
                 {
                     unit = Map.units[current.X, current.Y];
-                    movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost;
+                    movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost(this);
                     if (movement >= 0 && (unit == null || unit.Faction == Faction))
                         queue.Enqueue(new MovePoint(current, movement));
                 }
@@ -136,7 +135,7 @@ namespace Perlin
                 if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
                 {
                     unit = Map.units[current.X, current.Y];
-                    movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost;
+                    movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost(this);
                     if (movement >= 0 && (unit == null || unit.Faction == Faction))
                         queue.Enqueue(new MovePoint(current, movement));
                 }
@@ -214,16 +213,21 @@ namespace Perlin
             return points;
         }
 
-        public void Draw(Vector2 position)
+        public void Draw(Vector2 pos, DrawAlignment alignment)
         {
             if (IsFatigued)
             {
-                Texture.Draw(position, new Color(180, 180, 180));
+                Texture.Draw(pos, new Color(180, 180, 180), alignment);
             }
             else
             {
-                Texture.Draw(position);
+                Texture.Draw(pos, alignment);
             }
+        }
+
+        public void Draw(Vector2 pos)
+        {
+            Draw(pos, DrawAlignment.TopLeft);
         }
 
         public void DrawCard(Vector2 pos)

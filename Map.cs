@@ -79,12 +79,12 @@ namespace Perlin
             StartOfTurn();
         }
 
-        public void StartOfTurn()
+        private void StartOfTurn()
         {
             Logger.Log("Current faction: " + currentFaction.Name);
         }
 
-        public void EndofTurn()
+        private void EndofTurn()
         {
             for (int j = 0; j < Height; j++)
             {
@@ -101,6 +101,11 @@ namespace Perlin
                 currentFactionNum++;
 
             StartOfTurn();
+        }
+
+        public void EndTurn()
+        {
+            EndofTurn();
         }
 
         private bool AllUnitsFatigued(Faction faction)
@@ -351,7 +356,7 @@ namespace Perlin
             {
                 for (int i = 0; i < Width; i++)
                 {
-                    units[i, j]?.Draw(new Vector2(i * tileWidth, j * tileWidth));
+                    units[i, j]?.Draw(new Vector2(i * tileWidth, (j+1) * tileWidth), DrawAlignment.BottomLeft);
                 }
             }
 
