@@ -11,7 +11,7 @@ namespace Perlin
     public class Game1 : Engine
     {
 
-        public Game1() : base(1024, 1024)
+        public Game1() : base(1920, 1280)
         {
 
         }

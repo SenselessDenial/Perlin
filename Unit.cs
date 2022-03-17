@@ -43,11 +43,18 @@ namespace Perlin
             Name = name;
             Texture = texture;
             Class = unitClass;
-            Weapon = weapon;
+            Equip(weapon);
             Position = new Point(-1, -1);
             Stats = Statsheet.Demo;
             Faction = faction;
             IsFatigued = false;
+        }
+
+        public void Equip(Weapon weapon)
+        {
+            Weapon?.OnDequipped(this);
+            Weapon = weapon;
+            Weapon?.OnEquipped(this);
         }
 
         public int CalculateDodge()
@@ -87,6 +94,7 @@ namespace Perlin
 
             List<Point> points = new List<Point>();
             points.Add(Position);
+            List<Point> checkedPoints = new List<Point>();
 
             Queue<MovePoint> queue = new Queue<MovePoint>();
             queue.Enqueue(new MovePoint(Position, Movement));
@@ -97,47 +105,31 @@ namespace Perlin
                 Point point = p.Point;
 
                 if (Map.units[point.X, point.Y] == null && !points.Contains(point))
-                {
                     points.Add(point);
-                }
 
-                Point current = point + new Point(1, 0);
+                checkedPoints.Add(point);
+
                 int movement;
                 Unit unit;
 
-                if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
+                for (int i = -1; i <= 1; i++)
                 {
-                    unit = Map.units[current.X, current.Y];
-                    movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost(this);
-                    if (movement >= 0 && (unit == null || unit.Faction == Faction))
-                        queue.Enqueue(new MovePoint(current, movement));
-                }
+                    for (int j = -1; j <= 1; j++)
+                    {
+                        if (i*j == 0 && i != j)
+                        {
+                            Point current = point + new Point(i, j);
 
-                current = point + new Point(-1, 0);
-                if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
-                {
-                    unit = Map.units[current.X, current.Y];
-                    movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost(this);
-                    if (movement >= 0 && (unit == null || unit.Faction == Faction))
-                        queue.Enqueue(new MovePoint(current, movement));
-                }
+                            if (Map.Contains(current))
+                            {
+                                unit = Map.units[current.X, current.Y];
+                                movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost(this);
+                                if (!checkedPoints.Contains(current) && movement >= 0 && (unit == null || unit.Faction == Faction))
+                                    queue.Enqueue(new MovePoint(current, movement));
+                            }
 
-                current = point + new Point(0, 1);
-                if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
-                {
-                    unit = Map.units[current.X, current.Y];
-                    movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost(this);
-                    if (movement >= 0 && (unit == null || unit.Faction == Faction))
-                        queue.Enqueue(new MovePoint(current, movement));
-                }
-
-                current = point + new Point(0, -1);
-                if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
-                {
-                    unit = Map.units[current.X, current.Y];
-                    movement = p.Movement - Map.tiles[current.X, current.Y].MovementCost(this);
-                    if (movement >= 0 && (unit == null || unit.Faction == Faction))
-                        queue.Enqueue(new MovePoint(current, movement));
+                        }
+                    }
                 }
 
                 queue.Dequeue();
@@ -154,7 +146,7 @@ namespace Perlin
             }
 
             List<Point> points = new List<Point>();
-            List<Point> rejectedPoints = new List<Point>();
+            List<Point> checkedPoints = new List<Point>();
 
             Queue<MovePoint> queue = new Queue<MovePoint>();
             int range = Weapon.MaxRange;
@@ -165,46 +157,28 @@ namespace Perlin
                 MovePoint p = queue.Peek();
                 Point point = p.Point;
                 if (!points.Contains(point) && point != Position && p.Movement <= range - Weapon.MinRange)
-                {
                     points.Add(point);
-                }
-                else
-                {
-                    rejectedPoints.Add(point);
-                }
+                checkedPoints.Add(point);
 
-                Point current = point + new Point(1, 0);
                 int movement;
 
-                if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
+                for (int i = -1; i <= 1; i++)
                 {
-                    movement = p.Movement - 1;
-                    if (movement >= 0 && !(points.Contains(current) || rejectedPoints.Contains(current)))
-                        queue.Enqueue(new MovePoint(current, movement));
-                }
+                    for (int j = -1; j <= 1; j++)
+                    {
+                        if (i * j == 0 && i != j)
+                        {
+                            Point current = point + new Point(i, j);
 
-                current = point + new Point(-1, 0);
-                if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
-                {
-                    movement = p.Movement - 1;
-                    if (movement >= 0 && !(points.Contains(current) || rejectedPoints.Contains(current)))
-                        queue.Enqueue(new MovePoint(current, movement));
-                }
+                            if (Map.Contains(current))
+                            {
+                                movement = p.Movement - 1;
+                                if (!checkedPoints.Contains(current) && movement >= 0)
+                                    queue.Enqueue(new MovePoint(current, movement));
+                            }
 
-                current = point + new Point(0, 1);
-                if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
-                {
-                    movement = p.Movement - 1;
-                    if (movement >= 0 && !(points.Contains(current) || rejectedPoints.Contains(current)))
-                        queue.Enqueue(new MovePoint(current, movement));
-                }
-
-                current = point + new Point(0, -1);
-                if (current.X >= 0 && current.Y >= 0 && current.X < Map.Width && current.Y < Map.Height)
-                {
-                    movement = p.Movement - 1;
-                    if (movement >= 0 && !(points.Contains(current) || rejectedPoints.Contains(current)))
-                        queue.Enqueue(new MovePoint(current, movement));
+                        }
+                    }
                 }
 
                 queue.Dequeue();
@@ -212,6 +186,13 @@ namespace Perlin
 
             return points;
         }
+
+        public void FindMoveAndAttackTiles(out List<Point> movements, out List<Point> attacks)
+        {
+            movements = new List<Point>();
+            attacks = new List<Point>();
+        }
+
 
         public void Draw(Vector2 pos, DrawAlignment alignment)
         {

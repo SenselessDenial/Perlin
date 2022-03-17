@@ -58,6 +58,12 @@ namespace Perlin
         private Faction currentFaction => Factions[currentFactionNum];
         private int currentFactionNum = 0;
 
+        private bool DisplayAttacking = false;
+        private int A2dDamage;
+        private int A2dAccuracy;
+        private int D2aDamage;
+        private int D2aAccuracy;
+
         public Map(Scene scene, int width, int height) : base(scene)
         {
             this.Width = width;
@@ -122,6 +128,7 @@ namespace Perlin
         public void UpdateCursorState(bool aButtonPress, bool bButtonPress)
         {
             Unit unit = units[Cursor.X, Cursor.Y];
+            DisplayAttacking = false;
 
             switch (cursorState)
             {
@@ -182,6 +189,12 @@ namespace Perlin
                         cursorState = CursorStates.Unselected;
                         if (AllUnitsFatigued(currentFaction))
                             EndofTurn();
+                    }
+                    if (attackTiles != null && attackTiles.Contains(Cursor) && unit != null && unit.Faction != selectedUnit.Faction)
+                    {
+                        DisplayAttacking = true;
+                        CombatHandler.FindNumbers(selectedUnit, unit, out A2dDamage, out A2dAccuracy, out D2aDamage, out D2aAccuracy);
+                        cursorState = CursorStates.AfterMove;
                     }
                     break;
                 default:
@@ -393,7 +406,16 @@ namespace Perlin
             if (currentFaction != null)
                 Drawing.Font.Draw(currentFaction.Name, new Vector2(165, 10), currentFaction.Color);
 
-                
+            if (DisplayAttacking)
+            {
+                Drawing.Font.Draw(A2dDamage.ToString(), new Vector2(165, 20));
+                Drawing.Font.Draw(A2dAccuracy.ToString(), new Vector2(165, 30));
+                Drawing.Font.Draw(D2aDamage.ToString(), new Vector2(200, 20));
+                Drawing.Font.Draw(D2aAccuracy.ToString(), new Vector2(200, 30));
+            }
+
+
+
         }
 
 

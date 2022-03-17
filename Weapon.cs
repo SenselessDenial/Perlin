@@ -34,6 +34,16 @@ namespace Perlin
             IsMagic = isMagic;
         }
 
+        public virtual void OnEquipped(Unit unit)
+        {
+
+        }
+
+        public virtual void OnDequipped(Unit unit)
+        {
+
+        }
+
         public virtual int CalculateRawDamage(Unit user, Unit defender, Weapon defenderWeapon)
         {
             return IsMagic ? user.Stats.Magic + Damage : user.Stats.Strength + Damage;

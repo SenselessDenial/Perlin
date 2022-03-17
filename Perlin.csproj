@@ -51,8 +51,8 @@
     <Compile Include="Faction.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="Boys\GameOLBoyAdvance.cs" />
-    <Compile Include="LandMap.cs" />
     <Compile Include="Map.cs" />
+    <Compile Include="ModiferList.cs" />
     <Compile Include="NameGenerator.cs" />
     <Compile Include="Boys\NoisyBoy.cs" />
     <Compile Include="Boys\PerlinBoy.cs" />

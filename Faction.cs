@@ -20,10 +20,10 @@ namespace Perlin
         }
 
         public static Faction Neutral = new Faction("Neutral", Color.White);
-        public static Faction OrangeDoves = new Faction("Orange Doves", Color.Orange);
-        public static Faction GreenWolves = new Faction("Green Wolves", Color.Green);
-        public static Faction PurpleDragons = new Faction("Purple Dragons", Color.Purple);
-        public static Faction BlueFrogs = new Faction("Blue Frogs", Color.SkyBlue);
+        public static Faction OrangeDoves = new Faction("Topaz Kingdom", new Color(232, 155, 0));
+        public static Faction GreenWolves = new Faction("Emerald Nation", new Color(0, 232, 135));
+        public static Faction PurpleDragons = new Faction("Amethyst Empire", new Color(193, 0, 232));
+        public static Faction BlueFrogs = new Faction("Sapphire Republic", new Color(0, 104, 232));
 
     }
 }

@@ -40,6 +40,10 @@ namespace Perlin
             Unit karl = new Unit("Karl", Unit.tilemap[1, 2], UnitClass.Axeman, Weapon.IronAxe, Faction.OrangeDoves);
             Unit tharzin = new Unit("Tharzin", Unit.tilemap[3, 1], UnitClass.Pikeman, Weapon.IronSpear, Faction.PurpleDragons);
             Unit henneson = new Unit("Henneson", new GTexture("cavalry.png"), UnitClass.Cavalry, Weapon.IronSpear, Faction.BlueFrogs);
+
+
+
+
             map.PlaceUnit(0, 0, s);
             map.PlaceUnit(0, 1, bro);
             map.PlaceUnit(5, 6, karl);
