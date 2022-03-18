@@ -64,6 +64,19 @@ namespace Perlin
         private int D2aDamage;
         private int D2aAccuracy;
 
+
+
+        public Unit GetUnit(Point p)
+        {
+            return Contains(p) ? units[p.X, p.Y] : null;
+        }
+
+        public Tile GetTile(Point p)
+        {
+            return Contains(p) ? tiles[p.X, p.Y] : null;
+        }
+
+
         public Map(Scene scene, int width, int height) : base(scene)
         {
             this.Width = width;
@@ -87,7 +100,26 @@ namespace Perlin
 
         private void StartOfTurn()
         {
-            Logger.Log("Current faction: " + currentFaction.Name);
+            for(int j = 0; j < Height; j++)
+            {
+                for (int i = 0; i < Width; i++)
+                {
+                    if (units[i, j] != null && units[i, j].Faction == currentFaction)
+                    {
+                        units[i, j].IsFatigued = false;
+                        units[i, j].IsActive = true;
+                    }
+                }
+            }
+
+            for (int j = 0; j < Height; j++)
+            {
+                for (int i = 0; i < Width; i++)
+                {
+                    Unit unit = units[i, j];
+                    tiles[i, j].OnStartOfTurn(unit);
+                }
+            }
         }
 
         private void EndofTurn()
@@ -97,7 +129,11 @@ namespace Perlin
                 for (int i = 0; i < Width; i++)
                 {
                     if (units[i,j] != null && units[i, j].Faction == currentFaction)
+                    {
                         units[i, j].IsFatigued = false;
+                        units[i, j].IsActive = false;
+                    }
+                        
                 }
             }
 
@@ -150,11 +186,11 @@ namespace Perlin
                         storedPosition = new Point(-1, -1);
                         cursorState = CursorStates.Unselected;
                     }
-                    else if (aButtonPress && highlightedTiles != null && highlightedTiles.Contains(Cursor) && selectedUnit.Faction == currentFaction)
+                    else if (aButtonPress && highlightedTiles != null && highlightedTiles.Contains(Cursor) && selectedUnit.IsActive)
                     {
                         PlaceUnit(Cursor, selectedUnit);
                         highlightedTiles = null;
-                        attackTiles = selectedUnit?.FindAttackTiles();
+                        attackTiles = selectedUnit?.FindAttackTiles(selectedUnit.Position);
                         cursorState = CursorStates.AfterMove;
                     }
                     break;
@@ -167,9 +203,10 @@ namespace Perlin
                         cursorState = CursorStates.Selected;
 
                     }
-                    if (aButtonPress && attackTiles.Contains(Cursor) && unit != null && unit.Faction != selectedUnit.Faction)
+                    if (aButtonPress && attackTiles.Contains(Cursor) && unit != null)
                     {
-                        CombatHandler.AttackPlus(selectedUnit, selectedUnit.Weapon, units[Cursor.X, Cursor.Y], units[Cursor.X, Cursor.Y].Weapon);
+                        selectedUnit.LandOnTile();
+                        CombatHandler.AttackPlus(selectedUnit, selectedUnit.Weapon, unit, unit.Weapon);
                         selectedUnit.IsFatigued = true;
                         selectedUnit = null;
                         highlightedTiles = null;
@@ -181,6 +218,7 @@ namespace Perlin
                     }
                     else if (aButtonPress && Cursor == selectedUnit.Position)
                     {
+                        selectedUnit.LandOnTile();
                         selectedUnit.IsFatigued = true;
                         selectedUnit = null;
                         highlightedTiles = null;
@@ -365,6 +403,22 @@ namespace Perlin
                 }
             }
 
+            if (highlightedTiles != null)
+            {
+                foreach (var item in highlightedTiles)
+                {
+                    Drawing.DrawBox(new Rectangle(item.X * tileWidth, item.Y * tileWidth, tileWidth - 1, tileWidth - 1), new Color(0, 0, 255, 125));
+                }
+            }
+
+            if (attackTiles != null)
+            {
+                foreach (var item in attackTiles)
+                {
+                    Drawing.DrawBox(new Rectangle(item.X * tileWidth, item.Y * tileWidth, tileWidth - 1, tileWidth - 1), selectedUnit.Weapon.TileColor.WithAlpha(125));
+                }
+            }
+
             for (int j = 0; j < Height; j++)
             {
                 for (int i = 0; i < Width; i++)
@@ -373,24 +427,7 @@ namespace Perlin
                 }
             }
 
-            if (highlightedTiles != null)
-            {
-                foreach (var item in highlightedTiles)
-                {
-                    Drawing.DrawBox(new Rectangle(item.X * tileWidth, item.Y * tileWidth, tileWidth-1, tileWidth-1), new Color(0, 0, 255, 125));
-                }
-            }
-
-            if (attackTiles != null)
-            {
-                foreach (var item in attackTiles)
-                {
-                    Drawing.DrawBox(new Rectangle(item.X * tileWidth, item.Y * tileWidth, tileWidth-1, tileWidth-1), new Color(255, 0, 0, 125));
-                }
-            }
-
-
-
+            
             cursorTexture.Draw(Cursor.ToVector2() * tileWidth, currentFaction.Color);
 
             if (HoverUnit != null)

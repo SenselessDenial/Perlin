@@ -13,42 +13,88 @@ namespace Perlin
         public static Tilemap tilemap = new Tilemap(new GTexture("units.png"), 16, 16);
 
         public Map Map;
-        public Point Position
+        public Point Position { get; set; }
+
+        public void LandOnTile()
         {
-            get => position;
-            set
+            if (Map != null && Map.Contains(Position))
             {
-                position = value;
-                if (Map != null && Map.Contains(position))
-                    CurrentTile = Map.tiles[position.X, position.Y];
+                CurrentTile?.SteppedOff(this);
+                CurrentTile = Map.GetTile(Position);
+                CurrentTile?.SteppedOn(this);
             }
         }
-        private Point position;
+
         public Tile CurrentTile { get; private set; }
         public string Name { get; private set; }
         public GTexture Texture { get; private set; }
 
         public UnitClass Class;
-        public Statsheet Stats;
+        private Statsheet Stats;
         public Weapon Weapon;
         public int Movement => Class.Movement;
 
         public Faction Faction;
         public bool IsFatigued;
+        public bool IsActive;
 
-        public bool IsDead => Stats.HP <= 0;
+        public ModiferList ModiferList { get; private set; }
+
+        public bool IsDead => HP <= 0;
        
         public Unit(string name, GTexture texture, UnitClass unitClass, Weapon weapon, Faction faction)
         {
             Name = name;
             Texture = texture;
-            Class = unitClass;
+            ModiferList = new ModiferList();
+            Equip(unitClass);
             Equip(weapon);
             Position = new Point(-1, -1);
             Stats = Statsheet.Demo;
             Faction = faction;
             IsFatigued = false;
+            IsActive = false;
+
+            HP = MaxHP;
         }
+
+        public int HP
+        {
+            get => hp;
+            set
+            {
+                if (value <= 0)
+                    hp = 0;
+                else if (value >= MaxHP)
+                    hp = MaxHP;
+                else
+                    hp = value;
+            }
+        }
+        private int hp;
+        public int MaxHP => Stats.MaxHP + ModiferList[ModiferStats.MaxHP];
+        public int Strength => Stats.Strength + ModiferList[ModiferStats.Strength];
+        public int Magic => Stats.Magic + ModiferList[ModiferStats.Magic];
+        public int Defense => Stats.Defense + ModiferList[ModiferStats.Defense];
+        public int Resilience => Stats.Resilience + ModiferList[ModiferStats.Resilience];
+        public int Speed => Stats.Speed + ModiferList[ModiferStats.Speed];
+        public int Dexterity => Stats.Dexterity + ModiferList[ModiferStats.Dexterity];
+        public int Luck => Stats.Luck + ModiferList[ModiferStats.Luck];
+        public int Dodge => Speed + ModiferList[ModiferStats.DodgeBonus];
+
+
+        public void Heal(int amount)
+        {
+            HP += amount;
+        }
+
+        public void Heal(float percent)
+        {
+            HP += (int)Math.Ceiling(percent * MaxHP);
+        }
+
+
+
 
         public void Equip(Weapon weapon)
         {
@@ -57,14 +103,11 @@ namespace Perlin
             Weapon?.OnEquipped(this);
         }
 
-        public int CalculateDodge()
+        public void Equip(UnitClass unitClass)
         {
-            int dodge = Stats.Speed;
-
-            if (CurrentTile != null)
-                dodge += CurrentTile.DodgeBonus;
-
-            return dodge;
+            Class?.OnDequipped(this);
+            Class = unitClass;
+            Class?.OnEquipped(this);
         }
 
         public int DistanceFromUnit(Unit unit)
@@ -137,9 +180,9 @@ namespace Perlin
 
             return points;
         }
-        public List<Point> FindAttackTiles()
+        public List<Point> FindAttackTiles(Point position)
         {
-            if (Map == null || Position == new Point(-1, -1))
+            if (Map == null || position == new Point(-1, -1))
             {
                 Logger.Log("no");
                 return null;
@@ -150,13 +193,16 @@ namespace Perlin
 
             Queue<MovePoint> queue = new Queue<MovePoint>();
             int range = Weapon.MaxRange;
-            queue.Enqueue(new MovePoint(Position, range));
+            queue.Enqueue(new MovePoint(position, range));
 
             while (queue.Count > 0)
             {
                 MovePoint p = queue.Peek();
                 Point point = p.Point;
-                if (!points.Contains(point) && point != Position && p.Movement <= range - Weapon.MinRange)
+
+                Unit unit = Map.GetUnit(point);
+
+                if (!points.Contains(point) && p.Movement <= range - Weapon.MinRange && (unit == null || Weapon.IsValidTarget(this, unit)))
                     points.Add(point);
                 checkedPoints.Add(point);
 
@@ -194,7 +240,7 @@ namespace Perlin
         }
 
 
-        public void Draw(Vector2 pos, DrawAlignment alignment)
+        public void Draw(Vector2 pos, Color color, DrawAlignment alignment)
         {
             if (IsFatigued)
             {
@@ -202,29 +248,39 @@ namespace Perlin
             }
             else
             {
-                Texture.Draw(pos, alignment);
+                Texture.Draw(pos, color, alignment);
             }
+        }
+
+        public void Draw(Vector2 pos, DrawAlignment alignment)
+        {
+            Draw(pos, Color.White, alignment);
+        }
+
+        public void Draw(Vector2 pos, Color color)
+        {
+            Draw(pos, color, DrawAlignment.TopLeft);
         }
 
         public void Draw(Vector2 pos)
         {
-            Draw(pos, DrawAlignment.TopLeft);
+            Draw(pos, Color.White, DrawAlignment.TopLeft);
         }
 
         public void DrawCard(Vector2 pos)
         {
-            Drawing.Font.Draw(Name, pos, Faction.Color);
+            Drawing.Font.Draw(Name, pos, Color.White);
             //Drawing.Font.Draw(Class.Name, pos + new Vector2(40, 0));
             Weapon.Texture.Draw(pos + new Vector2(0, 10));
-            Drawing.Font.Draw(Weapon.Name, pos + new Vector2(20, 12));
-            Drawing.Font.Draw("HP: " + Stats.HP + "/" + Stats.MaxHP, pos + new Vector2(0, 30));
-            Drawing.Font.Draw("STR " + Stats.Strength, pos + new Vector2(0, 40));
-            Drawing.Font.Draw("MAG " + Stats.Magic, pos + new Vector2(0, 50));
-            Drawing.Font.Draw("DEF " + Stats.Defense, pos + new Vector2(0, 60));
-            Drawing.Font.Draw("RES " + Stats.Resilience, pos + new Vector2(0, 70));
-            Drawing.Font.Draw("SPD " + Stats.Speed, pos + new Vector2(40, 40));
-            Drawing.Font.Draw("DEX " + Stats.Dexterity, pos + new Vector2(40, 50));
-            Drawing.Font.Draw("LCK " + Stats.Luck, pos + new Vector2(40, 60));
+            Drawing.Font.Draw(Weapon.Name, pos + new Vector2(20, 14));
+            Drawing.Font.Draw("HP: " + HP + "/" + MaxHP, pos + new Vector2(0, 30));
+            Drawing.Font.Draw("STR " + Strength, pos + new Vector2(0, 40));
+            Drawing.Font.Draw("MAG " + Magic, pos + new Vector2(0, 50));
+            Drawing.Font.Draw("DEF " + Defense, pos + new Vector2(0, 60));
+            Drawing.Font.Draw("RES " + Resilience, pos + new Vector2(0, 70));
+            Drawing.Font.Draw("SPD " + Speed, pos + new Vector2(40, 40));
+            Drawing.Font.Draw("DEX " + Dexterity, pos + new Vector2(40, 50));
+            Drawing.Font.Draw("LCK " + Luck, pos + new Vector2(40, 60));
         }
 
         private struct MovePoint

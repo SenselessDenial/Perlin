@@ -35,20 +35,21 @@ namespace Perlin
             map.SetTile(2, 2, Tile.Forest);
             map.SetTile(3, 2, Tile.Mountain);
             map.SetTile(4, 2, Tile.Water);
+            map.SetTile(4, 4, new FarmTile());
+            map.SetTile(5, 4, new FarmTile());
             Unit s = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[1, 0], UnitClass.Swordsman, Weapon.IronSword, Faction.OrangeDoves);
             Unit bro = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[2, 3], UnitClass.Archer, Weapon.WoodenBow, Faction.GreenWolves);
             Unit karl = new Unit("Karl", Unit.tilemap[1, 2], UnitClass.Axeman, Weapon.IronAxe, Faction.OrangeDoves);
-            Unit tharzin = new Unit("Tharzin", Unit.tilemap[3, 1], UnitClass.Pikeman, Weapon.IronSpear, Faction.PurpleDragons);
+            Unit tharzin = new Unit("Tharzin", Unit.tilemap[3, 1], UnitClass.Pikeman, Weapon.Swordkiller, Faction.PurpleDragons);
             Unit henneson = new Unit("Henneson", new GTexture("cavalry.png"), UnitClass.Cavalry, Weapon.IronSpear, Faction.BlueFrogs);
-
-
-
+            Unit heala = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[0, 3], UnitClass.Wizard, Weapon.HealStaff, Faction.GreenWolves);
 
             map.PlaceUnit(0, 0, s);
             map.PlaceUnit(0, 1, bro);
             map.PlaceUnit(5, 6, karl);
             map.PlaceUnit(2, 3, tharzin);
             map.PlaceUnit(4, 7, henneson);
+            map.PlaceUnit(0, 3, heala);
 
             map.Start();
         }

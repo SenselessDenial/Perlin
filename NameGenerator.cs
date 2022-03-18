@@ -33,7 +33,12 @@ namespace Perlin
             "rolf",
             "wurz",
             "volt",
-            "ord"
+            "ord",
+            "heo",
+            "vann",
+            "erst",
+            "oth",
+            "visi"
         };
 
         static List<string> CompoundSuffix = new List<string>()
@@ -45,7 +50,10 @@ namespace Perlin
             "wick",
             "burg",
             "stock",
-            "bronn"
+            "bronn",
+            "nacht",
+            "neil",
+            "goth"
         };
 
 
