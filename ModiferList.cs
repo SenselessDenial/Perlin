@@ -10,36 +10,27 @@ namespace Perlin
 {
     class ModiferList
     {
+        public Unit Unit { get; private set; }
 
         int[] StatBonuses;
         List<Modifier> Modifiers;
 
-
         public int this[ModiferStats stat] => StatBonuses[(int)stat];
 
-
-
-        public ModiferList()
+        public ModiferList(Unit unit)
         {
+            Unit = unit;
             StatBonuses = new int[Enum.GetValues(typeof(ModiferStats)).Length];
             Modifiers = new List<Modifier>();
         }
         
         public void Reevaluate()
         {
-            ClearBonuses();
-            foreach (var item in Modifiers)
-            {
-                StatBonuses[((int)item.Stat)] += item.Value;
-            }
-        }
-
-        private void ClearBonuses()
-        {
             for (int i = 0; i < StatBonuses.Length; i++)
-            {
                 StatBonuses[i] = 0;
-            }
+
+            foreach (var item in Modifiers)
+                StatBonuses[((int)item.Stat)] += item.Value;
         }
 
         public void AddModifier(Modifier modifier)
@@ -91,7 +82,8 @@ namespace Perlin
         Dexterity,
         Luck,
         DodgeBonus,
-        AccuracyBonus
+        AccuracyBonus,
+        MovementBonus
     }
 
     struct Modifier

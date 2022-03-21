@@ -12,8 +12,15 @@ namespace Perlin
     {
         public string Name { get; private set; }
 
+        public virtual bool IsTrue(Unit user)
+        {
+            return true;
+        }
 
+        public virtual void OnTrue(Unit user)
+        {
 
+        }
 
 
 

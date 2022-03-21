@@ -64,6 +64,10 @@ namespace Perlin
         private int D2aDamage;
         private int D2aAccuracy;
 
+        public void OnUnitMoved()
+        {
+
+        }
 
 
         public Unit GetUnit(Point p)
@@ -100,26 +104,20 @@ namespace Perlin
 
         private void StartOfTurn()
         {
-            for(int j = 0; j < Height; j++)
-            {
+            for (int j = 0; j < Height; j++)
                 for (int i = 0; i < Width; i++)
-                {
                     if (units[i, j] != null && units[i, j].Faction == currentFaction)
                     {
                         units[i, j].IsFatigued = false;
                         units[i, j].IsActive = true;
                     }
-                }
-            }
 
             for (int j = 0; j < Height; j++)
-            {
                 for (int i = 0; i < Width; i++)
                 {
                     Unit unit = units[i, j];
                     tiles[i, j].OnStartOfTurn(unit);
                 }
-            }
         }
 
         private void EndofTurn()
@@ -171,7 +169,7 @@ namespace Perlin
                 case CursorStates.Unselected:
                     if (aButtonPress && unit != null && !unit.IsFatigued)
                     {
-                        selectedUnit = units[Cursor.X, Cursor.Y];
+                        selectedUnit = unit;
                         storedPosition = selectedUnit.Position;
                         highlightedTiles = SelectedUnit?.FindMovementTiles();
                         cursorState = CursorStates.Selected;
@@ -206,7 +204,7 @@ namespace Perlin
                     if (aButtonPress && attackTiles.Contains(Cursor) && unit != null)
                     {
                         selectedUnit.LandOnTile();
-                        CombatHandler.AttackPlus(selectedUnit, selectedUnit.Weapon, unit, unit.Weapon);
+                        CombatHandler.Attack(selectedUnit, selectedUnit.Weapon, unit, unit.Weapon);
                         selectedUnit.IsFatigued = true;
                         selectedUnit = null;
                         highlightedTiles = null;
@@ -238,6 +236,19 @@ namespace Perlin
                 default:
                     break;
             }
+        }
+
+        public void RemoveFromBoard(Unit unit)
+        {
+            if (ListOfUnits.Contains(unit))
+            {
+                units[unit.Position.X, unit.Position.Y] = null;
+                unit.Position = new Point(-1, -1);
+                ListOfUnits.Remove(unit);
+                unit.Map = null;
+            }
+
+            HoverUnit = units[Cursor.X, Cursor.Y];
         }
 
 
@@ -450,7 +461,6 @@ namespace Perlin
                 Drawing.Font.Draw(D2aDamage.ToString(), new Vector2(200, 20));
                 Drawing.Font.Draw(D2aAccuracy.ToString(), new Vector2(200, 30));
             }
-
 
 
         }

@@ -14,8 +14,11 @@ namespace Perlin
         public int Movement { get; private set; }
         public MovementTypes MovementType { get; private set; }
         public Weapon.WeaponTypes WeaponType { get; private set; }
-
+        
         public List<Modifier> Modifiers { get; private set; }
+
+        public int[] Growths { get; private set; }
+
 
         public UnitClass(string name, int movement, MovementTypes movementType, Weapon.WeaponTypes weaponType, List<Modifier> modifiers)
         {
@@ -24,6 +27,13 @@ namespace Perlin
             MovementType = movementType;
             WeaponType = weaponType;
             Modifiers = modifiers;
+            Growths = new int[Statsheet.NumOfStats];
+
+            for (int i = 0; i < Statsheet.NumOfStats; i++)
+            {
+                Growths[i] = 40;
+            }
+
         }
 
         public UnitClass(string name) 

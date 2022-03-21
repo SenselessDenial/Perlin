@@ -12,16 +12,13 @@ namespace Perlin
     {
 
         public Swordkiller()
-            : base("Sword Killer", WeaponTextures[4], WeaponTypes.Lance, 5, 1, 1, 80, false)
+            : base("Sword Killer", WeaponTextures[4], WeaponTypes.Lance, 5, 1, 1, 80, false) { }
+
+        public override int CalculateRawAccuracy(Unit user, Unit defender)
         {
+            int raw = base.CalculateRawAccuracy(user, defender);
 
-        }
-
-        public override int CalculateRawAccuracy(Unit user, Unit defender, Weapon defenderWeapon)
-        {
-            int raw = base.CalculateRawAccuracy(user, defender, defenderWeapon);
-
-            if (defenderWeapon.Type == WeaponTypes.Sword)
+            if (defender.Weapon.Type == WeaponTypes.Sword)
             {
                 raw += 20;
             }
@@ -29,11 +26,11 @@ namespace Perlin
             return raw;
         }
 
-        public override int CalculateRawDamage(Unit user, Unit defender, Weapon defenderWeapon)
+        public override int CalculateRawDamage(Unit user, Unit defender)
         {
-            int raw = base.CalculateRawDamage(user, defender, defenderWeapon);
+            int raw = base.CalculateRawDamage(user, defender);
 
-            if (defenderWeapon.Type == WeaponTypes.Sword)
+            if (defender.Weapon.Type == WeaponTypes.Sword)
             {
                 raw += 5;
             }

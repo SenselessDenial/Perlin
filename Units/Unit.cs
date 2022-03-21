@@ -13,7 +13,20 @@ namespace Perlin
         public static Tilemap tilemap = new Tilemap(new GTexture("units.png"), 16, 16);
 
         public Map Map;
-        public Point Position { get; set; }
+        public Point Position
+        {
+            get => position;
+            set
+            {
+                position = value;
+                Map?.OnUnitMoved();
+            }
+        }
+
+        private Point position;
+
+        public int Level => Statsheet.Level;
+        public int XP => Statsheet.XP;
 
         public void LandOnTile()
         {
@@ -25,18 +38,23 @@ namespace Perlin
             }
         }
 
+        public void RemoveSelfFromBoard()
+        {
+            Map?.RemoveFromBoard(this);
+        }
+
         public Tile CurrentTile { get; private set; }
         public string Name { get; private set; }
         public GTexture Texture { get; private set; }
 
         public UnitClass Class;
-        private Statsheet Stats;
+        private Statsheet Statsheet;
         public Weapon Weapon;
-        public int Movement => Class.Movement;
 
         public Faction Faction;
         public bool IsFatigued;
         public bool IsActive;
+        private float xpMultiplier = 1f;
 
         public ModiferList ModiferList { get; private set; }
 
@@ -46,11 +64,11 @@ namespace Perlin
         {
             Name = name;
             Texture = texture;
-            ModiferList = new ModiferList();
+            ModiferList = new ModiferList(this);
             Equip(unitClass);
             Equip(weapon);
             Position = new Point(-1, -1);
-            Stats = Statsheet.Demo;
+            Statsheet = Statsheet.Demo(this);
             Faction = faction;
             IsFatigued = false;
             IsActive = false;
@@ -72,15 +90,31 @@ namespace Perlin
             }
         }
         private int hp;
-        public int MaxHP => Stats.MaxHP + ModiferList[ModiferStats.MaxHP];
-        public int Strength => Stats.Strength + ModiferList[ModiferStats.Strength];
-        public int Magic => Stats.Magic + ModiferList[ModiferStats.Magic];
-        public int Defense => Stats.Defense + ModiferList[ModiferStats.Defense];
-        public int Resilience => Stats.Resilience + ModiferList[ModiferStats.Resilience];
-        public int Speed => Stats.Speed + ModiferList[ModiferStats.Speed];
-        public int Dexterity => Stats.Dexterity + ModiferList[ModiferStats.Dexterity];
-        public int Luck => Stats.Luck + ModiferList[ModiferStats.Luck];
+        public int MaxHP => Statsheet.GetStat(Stats.MaxHP) + ModiferList[ModiferStats.MaxHP];
+        public int Strength => Statsheet.GetStat(Stats.Strength) + ModiferList[ModiferStats.Strength];
+        public int Magic => Statsheet.GetStat(Stats.Magic) + ModiferList[ModiferStats.Magic];
+        public int Defense => Statsheet.GetStat(Stats.Defense) + ModiferList[ModiferStats.Defense];
+        public int Resilience => Statsheet.GetStat(Stats.Resilience) + ModiferList[ModiferStats.Resilience];
+        public int Speed => Statsheet.GetStat(Stats.Speed) + ModiferList[ModiferStats.Speed];
+        public int Dexterity => Statsheet.GetStat(Stats.Dexterity) + ModiferList[ModiferStats.Dexterity];
+        public int Luck => Statsheet.GetStat(Stats.Luck) + ModiferList[ModiferStats.Luck];
+
+        public int Movement => Class.Movement + ModiferList[ModiferStats.MovementBonus];
         public int Dodge => Speed + ModiferList[ModiferStats.DodgeBonus];
+
+        public int AttackPower => Weapon.CalculateRawPower(this);
+        public int Accuracy => Weapon.CalculateAccuracy(this) + ModiferList[ModiferStats.AccuracyBonus];
+
+        public void LevelUp()
+        {
+            Statsheet.XP += 100;
+        }
+
+        public void LevelUp(int num)
+        {
+            for (int i = 0; i < num; i++)
+                LevelUp();
+        }
 
 
         public void Heal(int amount)
@@ -92,6 +126,28 @@ namespace Perlin
         {
             HP += (int)Math.Ceiling(percent * MaxHP);
         }
+
+        public void GainXP(int amount)
+        {
+            Statsheet.XP += (int)(amount * xpMultiplier);
+        }
+
+        public void AfterCombat(Unit opponent)
+        {
+            GainXP(10 + (opponent.Level - Level));
+        }
+
+        public void OnKilling(Unit killed)
+        {
+            GainXP(30 + 2 * (killed.Level - Level));
+        }
+
+        public void OnDeath(Unit killer)
+        {
+            killer.OnKilling(this);
+            RemoveSelfFromBoard();
+        }
+
 
 
 
@@ -281,6 +337,11 @@ namespace Perlin
             Drawing.Font.Draw("SPD " + Speed, pos + new Vector2(40, 40));
             Drawing.Font.Draw("DEX " + Dexterity, pos + new Vector2(40, 50));
             Drawing.Font.Draw("LCK " + Luck, pos + new Vector2(40, 60));
+            Drawing.Font.Draw("MOV " + Movement, pos + new Vector2(40, 70));
+            Drawing.Font.Draw("ATK " + AttackPower, pos + new Vector2(0, 80));
+            Drawing.Font.Draw("ACC " + Accuracy, pos + new Vector2(40, 80));
+            Drawing.Font.Draw("LVL " + Level, pos + new Vector2(0, 90));
+            Drawing.Font.Draw("XP  " + XP, pos + new Vector2(40, 90));
         }
 
         private struct MovePoint

@@ -20,7 +20,7 @@ namespace Perlin
         public int MaxRange { get; private set; }
         public int Accuracy { get; private set; }
         public bool IsMagic { get; private set; }
-        public bool IsRanged => MaxRange == 1;
+        public bool IsRanged => MaxRange > 1;
         public Color TileColor { get; protected set; }
 
         protected Weapon(string name, GTexture texture, WeaponTypes type, int damage, int minRange, int maxRange, int accuracy, bool isMagic)
@@ -46,29 +46,44 @@ namespace Perlin
 
         }
 
-        public virtual int CalculateRawDamage(Unit user, Unit defender, Weapon defenderWeapon)
+        public virtual int CalculateRawPower(Unit user)
         {
             return IsMagic ? user.Magic + Damage : user.Strength + Damage;
         }
 
-        public virtual int CalculateRawAccuracy(Unit user, Unit defender, Weapon defenderWeapon)
+        public virtual int CalculateAccuracy(Unit user)
         {
             return user.Dexterity + Accuracy;
         }
 
-        public virtual int CalculateReduction(Unit user, Unit defender, Weapon defenderWeapon)
+        public virtual int CalculateRawDamage(Unit user, Unit defender)
+        {
+            return IsMagic ? user.Magic + Damage : user.Strength + Damage;
+        }
+
+        public virtual int CalculateRawAccuracy(Unit user, Unit defender)
+        {
+            return user.Dexterity + Accuracy;
+        }
+
+        public virtual int CalculateReduction(Unit user, Unit defender)
         {
             return IsMagic ? defender.Resilience : defender.Defense;
         }
 
-        public virtual int CalculateDodge(Unit user, Unit defender, Weapon defenderWeapon)
+        public virtual int CalculateDodge(Unit user, Unit defender)
         {
             return defender.Dodge;
         }
 
-        public virtual bool CanBeCountered(Unit user, Unit defender, Weapon defenderWeapon)
+        public virtual bool CanBeCountered(Unit user, Unit defender)
         {
             return defender.InRangeOf(user);
+        }
+
+        public virtual bool CanCounter(Unit user, Unit attacker)
+        {
+            return !user.IsDead;
         }
 
         public virtual bool IsValidTarget(Unit user, Unit target)
@@ -76,13 +91,13 @@ namespace Perlin
             return target.Faction != user.Faction;
         }
 
-        public virtual void Attack(Unit user, Unit defender, Weapon defendWeapon)
+        public virtual void Attack(Unit user, Unit defender, out bool hitTarget)
         {
-            int damage = CalculateRawDamage(user, defender, defendWeapon);
-            int accuracy = CalculateRawAccuracy(user, defender, defendWeapon);
+            int damage = CalculateRawDamage(user, defender);
+            int accuracy = CalculateRawAccuracy(user, defender);
 
-            int reduction = CalculateReduction(user, defender, defendWeapon);
-            int dodge = CalculateDodge(user, defender, defendWeapon);
+            int reduction = CalculateReduction(user, defender);
+            int dodge = CalculateDodge(user, defender);
 
             int chance = Calc.Next(0, 100);
 
@@ -92,11 +107,18 @@ namespace Perlin
             {
                 defender.HP -= trueDamage;
                 Logger.Log(user.Name + " has attacked " + defender.Name + " for " + trueDamage + " damage.");
+                hitTarget = true;
             }
             else
             {
                 Logger.Log(user.Name + " has missed an attack on " + defender.Name + ".");
+                hitTarget = false;
             }
+        }
+
+        public void Attack(Unit user, Unit defender)
+        {
+            Attack(user, defender, out _);
         }
 
         public enum WeaponTypes
