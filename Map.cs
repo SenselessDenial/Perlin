@@ -52,8 +52,10 @@ namespace Perlin
         private List<Point> attackTiles;
         private Point storedPosition = new Point(-1, -1);
 
-        private List<Faction> Factions;
-        private List<Unit> ListOfUnits;
+        private readonly List<Faction> Factions;
+        private Faction[] factions;
+
+        public readonly List<Unit> ListOfUnits;
 
         private Faction currentFaction => Factions[currentFactionNum];
         private int currentFactionNum = 0;
@@ -94,6 +96,7 @@ namespace Perlin
             highlightedTiles = null;
             attackTiles = null;
             Factions = new List<Faction>();
+            factions = new Faction[6];
             ListOfUnits = new List<Unit>();
         }
 
@@ -104,6 +107,8 @@ namespace Perlin
 
         private void StartOfTurn()
         {
+            Logger.Log(currentFaction.Name);
+
             for (int j = 0; j < Height; j++)
                 for (int i = 0; i < Width; i++)
                     if (units[i, j] != null && units[i, j].Faction == currentFaction)
@@ -135,7 +140,7 @@ namespace Perlin
                 }
             }
 
-            if (currentFactionNum == Factions.Count - 1)
+            if(currentFactionNum == Factions.Count - 1)
                 currentFactionNum = 0;
             else
                 currentFactionNum++;
@@ -150,6 +155,9 @@ namespace Perlin
 
         private bool AllUnitsFatigued(Faction faction)
         {
+            if (faction == null)
+                return true;
+
             foreach (var item in ListOfUnits)
             {
                 if (item.Faction == faction && !item.IsFatigued)
@@ -246,6 +254,22 @@ namespace Perlin
                 unit.Position = new Point(-1, -1);
                 ListOfUnits.Remove(unit);
                 unit.Map = null;
+
+                bool factionStillLives = false;
+                foreach (var item in ListOfUnits)
+                {
+                    if (item.Faction == unit.Faction)
+                    {
+                        factionStillLives = true;
+                        break;
+                    }
+                }
+                if (!factionStillLives)
+                {
+
+                }
+                   
+
             }
 
             HoverUnit = units[Cursor.X, Cursor.Y];
@@ -328,6 +352,18 @@ namespace Perlin
                 }
             }
             return false;
+        }
+
+        public List<Unit> UnitsWithinRadius(Point center, int radius)
+        {
+            return (from item in ListOfUnits
+                    where item.DistanceFromPoint(center) <= radius
+                    select item).ToList();
+        }
+
+        public bool IsUnitWithinRadius(Unit unit, Point center, int radius)
+        {
+            return unit.DistanceFromPoint(center) <= radius;
         }
 
         private void UpdateCursor()

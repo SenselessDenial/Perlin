@@ -24,7 +24,7 @@ namespace Perlin
             c = new Camera();
             f = new FullRenderer();
             f.Camera = c;
-            c.Scale = new Vector2(4f, 4f);
+            c.Scale = new Vector2(3f, 3f);
             c.UpdateMatrix();
             Renderers.Add(f);
 
@@ -43,6 +43,8 @@ namespace Perlin
             Unit tharzin = new Unit("Tharzin", Unit.tilemap[3, 1], UnitClass.Pikeman, Weapon.Swordkiller, Faction.PurpleDragons);
             Unit henneson = new Unit("Henneson", new GTexture("cavalry.png"), UnitClass.Cavalry, Weapon.IronSpear, Faction.BlueFrogs);
             Unit heala = new Unit(NameGenerator.GenerateComboName(), Unit.tilemap[0, 3], UnitClass.Wizard, Weapon.HealStaff, Faction.GreenWolves);
+            karl.AddSkill(Skill.Str2);
+            karl.AddSkill(Skill.HP5);
 
             map.PlaceUnit(0, 0, s);
             map.PlaceUnit(0, 1, bro);

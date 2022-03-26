@@ -49,6 +49,8 @@
     <Compile Include="Boys\Cube.cs" />
     <Compile Include="DemScene.cs" />
     <Compile Include="Faction.cs" />
+    <Compile Include="Skills\Skillset.cs" />
+    <Compile Include="Skills\PermBonus.cs" />
     <Compile Include="Tiles\FarmTile.cs" />
     <Compile Include="Main\Game1.cs" />
     <Compile Include="Boys\GameOLBoyAdvance.cs" />
@@ -60,7 +62,7 @@
     <Compile Include="Boys\PerlinBoy.cs" />
     <Compile Include="Main\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Skill.cs" />
+    <Compile Include="Skills\Skill.cs" />
     <Compile Include="Units\Statsheet.cs" />
     <Compile Include="Weapons\Swordkiller.cs" />
     <Compile Include="Tiles\Tile.cs" />

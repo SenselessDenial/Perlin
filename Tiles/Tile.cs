@@ -11,6 +11,9 @@ namespace Perlin
     class Tile
     {
         public static Tilemap tilemap = new Tilemap(new GTexture("newtilemap.png"), 16, 16);
+        public static Tilemap tilemap2 = new Tilemap(new GTexture("overworld_tileset_grass.png"), 16, 16);
+        public static Tilemap tilemap3 = new Tilemap(new GTexture("basictiles.png"), 16, 16);
+        public static Tilemap tilemap4 = new Tilemap(new GTexture("sheet.png"), 16, 16);
         public string Name { get; protected set; }
         public virtual GTexture Texture { get; protected set; }
         private int MvCostFoot = 1;
@@ -65,9 +68,9 @@ namespace Perlin
             Drawing.Font.Draw("MV Cost: " + MvCostFoot, pos + new Vector2(20, 10));
         }
 
-        public static Tile Grass = new Tile("Grass", tilemap[1], 1, 1);
-        public static Tile Forest = new Tile("Forest", tilemap[2], 2, 5);
-        public static Tile Mountain = new Tile("Mountain", tilemap[3], 3, 10);
-        public static Tile Water = new Tile("Water", tilemap[4], 99, 99);
+        public static Tile Grass = new Tile("Grass", tilemap2[0], 1, 1);
+        public static Tile Forest = new Tile("Forest", tilemap2[11, 7], 2, 5);
+        public static Tile Mountain = new Tile("Mountain", tilemap2[8, 20], 3, 10);
+        public static Tile Water = new Tile("Water", tilemap2[8, 18], 99, 99);
     }
 }

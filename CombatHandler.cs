@@ -39,17 +39,20 @@ namespace Perlin
 
         public static void Attack(Unit attacker, Weapon attackWeapon, Unit defender, Weapon defendWeapon)
         {
-            bool a2dHit;
+            bool a2dHit, d2aHit = false;
             attackWeapon.Attack(attacker, defender, out a2dHit);
             if (defender.IsDead)
                 defender.OnDeath(attacker);
             else if (attackWeapon.CanBeCountered(attacker, defender) && defendWeapon.CanCounter(defender, attacker))
-                defendWeapon.Attack(defender, attacker);
+                defendWeapon.Attack(defender, attacker, out d2aHit);
 
             if (attacker.IsDead)
                 attacker.OnDeath(defender);
             else if (a2dHit)
                 attacker.AfterCombat(defender);
+
+            if (!defender.IsDead && d2aHit)
+                defender.AfterCombat(attacker);
         }
 
 

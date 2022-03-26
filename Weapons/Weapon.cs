@@ -99,7 +99,7 @@ namespace Perlin
             int reduction = CalculateReduction(user, defender);
             int dodge = CalculateDodge(user, defender);
 
-            int chance = Calc.Next(0, 100);
+            int chance = Calc.Roll();
 
             int trueDamage = (damage - reduction <= 0) ? 0 : damage - reduction;
 

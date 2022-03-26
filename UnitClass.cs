@@ -41,15 +41,13 @@ namespace Perlin
 
         public virtual void OnEquipped(Unit unit)
         {
-            unit.ModiferList.AddModifier(Modifiers);
+            unit.AddModifier(Modifiers);
         }
 
         public virtual void OnDequipped(Unit unit)
         {
-            unit.ModiferList.RemoveModifier(Modifiers);
+            unit.RemoveModifier(Modifiers);
         }
-
-
 
         public static UnitClass Villager = new UnitClass("Villager");
         public static UnitClass Swordsman = new UnitClass("Swordsman", 3, MovementTypes.Foot, Weapon.WeaponTypes.Sword, new List<Modifier>() 

@@ -20,8 +20,8 @@ namespace Perlin
             {
                 if (value < 0)
                     state = 0;
-                else if (value > 3)
-                    state = 3;
+                else if (value > 2)
+                    state = 2;
                 else
                     state = value;
 
@@ -35,7 +35,7 @@ namespace Perlin
             : base("Farm", null, 1, 1)
         {
             animation = new Animation();
-            animation.AddFrames(tilemap[6], tilemap[7], tilemap[8], tilemap[9]);
+            animation.AddFrames(tilemap2[11, 15], tilemap2[11, 16], tilemap2[11, 17]);
             Texture = animation[0];
         }
 

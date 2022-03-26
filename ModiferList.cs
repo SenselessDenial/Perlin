@@ -26,11 +26,15 @@ namespace Perlin
         
         public void Reevaluate()
         {
+            int maxhp = Unit.MaxHP;
+
             for (int i = 0; i < StatBonuses.Length; i++)
                 StatBonuses[i] = 0;
 
             foreach (var item in Modifiers)
                 StatBonuses[((int)item.Stat)] += item.Value;
+
+            Unit.HP += Unit.MaxHP - maxhp;
         }
 
         public void AddModifier(Modifier modifier)

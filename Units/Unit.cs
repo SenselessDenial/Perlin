@@ -56,7 +56,48 @@ namespace Perlin
         public bool IsActive;
         private float xpMultiplier = 1f;
 
-        public ModiferList ModiferList { get; private set; }
+        private ModiferList ModiferList;
+        private Skillset Skillset;
+
+        public void AddModifier(Modifier modifier)
+        {
+            ModiferList.AddModifier(modifier);
+        }
+
+        public void AddModifier(List<Modifier> modifiers)
+        {
+            ModiferList.AddModifier(modifiers);
+        }
+
+        public void RemoveModifier(Modifier modifier)
+        {
+            ModiferList.RemoveModifier(modifier);
+        }
+
+        public void RemoveModifier(List<Modifier> modifiers)
+        {
+            ModiferList.RemoveModifier(modifiers);
+        }
+
+        public void AddSkill(Skill skill)
+        {
+            Skillset.Add(skill);
+        }
+
+        public void RemoveSkill(Skill skill)
+        {
+            Skillset.Remove(skill);
+        }
+
+        public virtual void OnEnteringCombat(Unit opponent)
+        {
+            Skillset.OnEnteringCombat(opponent);
+        }
+
+        public virtual void OnLeavingCombat(Unit opponent)
+        {
+            Skillset.OnLeavingCombat(opponent);
+        }
 
         public bool IsDead => HP <= 0;
        
@@ -64,14 +105,17 @@ namespace Perlin
         {
             Name = name;
             Texture = texture;
-            ModiferList = new ModiferList(this);
-            Equip(unitClass);
-            Equip(weapon);
             Position = new Point(-1, -1);
-            Statsheet = Statsheet.Demo(this);
             Faction = faction;
             IsFatigued = false;
             IsActive = false;
+
+            Statsheet = Statsheet.Demo(this);
+            Skillset = new Skillset(this);
+            ModiferList = new ModiferList(this);
+
+            Equip(unitClass);
+            Equip(weapon);
 
             HP = MaxHP;
         }
@@ -169,6 +213,12 @@ namespace Perlin
         public int DistanceFromUnit(Unit unit)
         {
             Point diff = Position - unit.Position;
+            return Math.Abs(diff.X) + Math.Abs(diff.Y);
+        }
+
+        public int DistanceFromPoint(Point point)
+        {
+            Point diff = Position - point;
             return Math.Abs(diff.X) + Math.Abs(diff.Y);
         }
 
